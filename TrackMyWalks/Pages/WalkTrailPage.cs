@@ -3,16 +3,25 @@
 using Xamarin.Forms;
 using TrackMyWalks.Models;
 using TrackMyWalks.ViewModels;
+using TrackMyWalks.Services;
 
 namespace TrackMyWalks.Pages
 {
     public class WalkTrailPage : ContentPage
     {
+        WalksTrailViewModel _viewModel
+        {
+            get
+            {
+                return BindingContext as WalksTrailViewModel;
+            }
+        }
+
         public WalkTrailPage(WalkEntries walkItem)
         {
             Title = "Szlak";
 
-            BindingContext = new WalksTrailViewModel(walkItem);
+            BindingContext = new WalksTrailViewModel(DependencyService.Get<IWalkNavService>());
 
             var beginTrailWalk = new Button
             {
@@ -23,10 +32,8 @@ namespace TrackMyWalks.Pages
 
             beginTrailWalk.Clicked += (sender, e) =>
             {
-                if (walkItem == null) return;
-                Navigation.PushAsync(new DistanceTravelledPage(walkItem));
-                Navigation.RemovePage(this);
-                walkItem = null;
+                if (_viewModel.WalkEntry == null) return;
+                _viewModel.DistanceTravelled.Execute(_viewModel.WalkEntry);
             };
 
             var walkTrailImage = new Image()

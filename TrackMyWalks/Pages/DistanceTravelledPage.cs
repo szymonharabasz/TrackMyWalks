@@ -4,6 +4,7 @@ using Xamarin.Forms;
 using Xamarin.Forms.Maps;
 using TrackMyWalks.Models;
 using TrackMyWalks.ViewModels;
+using TrackMyWalks.Services;
 
 namespace TrackMyWalks.Pages
 {
@@ -14,11 +15,11 @@ namespace TrackMyWalks.Pages
             get { return BindingContext as DistanceTravelledViewModel; }
         }
 
-        public DistanceTravelledPage(WalkEntries walkItem)
+        public DistanceTravelledPage()
         {
             Title = "Przebyty dystans";
 
-            BindingContext = new DistanceTravelledViewModel(walkItem);
+            BindingContext = new DistanceTravelledViewModel(DependencyService.Get<IWalkNavService>());
 
             var trailMap = new Map();
             trailMap.Pins.Add(new Pin
@@ -58,7 +59,7 @@ namespace TrackMyWalks.Pages
                 FontSize = 20,
                 FontAttributes = FontAttributes.Bold,
                 TextColor = Color.Black,
-                Text = $"{walkItem.Distance} km",
+                Text = $"{_viewModel.WalkEntry.Distance} km",
                 HorizontalTextAlignment = TextAlignment.Center
             };
 
@@ -91,9 +92,8 @@ namespace TrackMyWalks.Pages
             };
             walksHomeButton.Clicked += (sender, e) =>
             {
-                if (walkItem == null) return;
-                Navigation.PopToRootAsync(true);
-                walkItem = null;
+                if (_viewModel.WalkEntry == null) return;
+                _viewModel.BackToMainPage.Execute(0);
             };
 
             this.Content = new ScrollView
@@ -116,6 +116,15 @@ namespace TrackMyWalks.Pages
                     }
                 }
             };
+        }
+
+        protected override async void OnAppearing()
+        {
+            base.OnAppearing();
+            if (_viewModel != null)
+            {
+                await _viewModel.Init();
+            }
         }
     }
 }

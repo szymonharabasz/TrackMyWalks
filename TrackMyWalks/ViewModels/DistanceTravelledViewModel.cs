@@ -1,9 +1,14 @@
-﻿using TrackMyWalks.Models;
+﻿using System.Threading.Tasks;
+using TrackMyWalks.Models;
+using TrackMyWalks.Services;
+using Xamarin.Forms;
 
 namespace TrackMyWalks.ViewModels
 {
-    public class DistanceTravelledViewModel : WalkBaseViewModel
+    public class DistanceTravelledViewModel : WalkBaseViewModel<WalkEntries>
     {
+        IWalkLocationService locationService;
+
         WalkEntries _walkEntry;
         public WalkEntries WalkEntry
         {
@@ -60,14 +65,43 @@ namespace TrackMyWalks.ViewModels
             }
         }
 
-        public DistanceTravelledViewModel(WalkEntries walkEntry)
+        public DistanceTravelledViewModel(IWalkNavService navService) : base(navService)
         {
             this.Travelled = 100;
             this.Hours = 0;
             this.Minutes = 0;
             this.Seconds = 0;
 
-            WalkEntry = walkEntry;
+            locationService = DependencyService.Get<IWalkLocationService>();
+            locationService.MyLocation += (object sender, IWalkLocationCoords e) =>
+            {
+                if (_walkEntry != null)
+                {
+                    var distance = locationService.GetDistanceTravelled(_walkEntry.Latitude, _walkEntry.Longitude);
+                    this.Travelled = distance;
+                }
+            };
+            locationService.GetMyLocation();
+        }
+
+        public override async Task Init(WalkEntries walkDetails)
+        {
+            await Task.Factory.StartNew(() =>
+            {
+                WalkEntry = walkDetails;
+            });
+        }
+
+        Command _mainPage;
+        public Command BackToMainPage
+        {
+            get
+            {
+                return _mainPage ?? (_mainPage = new Command(async () =>
+                {
+                    await NavService.BackToMainPage();
+                }));
+            }
         }
     }
 }

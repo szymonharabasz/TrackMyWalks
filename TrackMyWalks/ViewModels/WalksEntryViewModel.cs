@@ -1,13 +1,29 @@
-﻿using TrackMyWalks.Models;
+﻿using System.Diagnostics.Contracts;
+using System.Threading.Tasks;
+using TrackMyWalks.Models;
 using TrackMyWalks.ViewModels;
+using TrackMyWalks.Services;
 using Xamarin.Forms;
 
 namespace TrackMyWalks.ViewModels
 {
     public class WalksEntryViewModel : WalkBaseViewModel
     {
-        public WalksEntryViewModel()
+        IWalkLocationService locationService;
+
+        public WalksEntryViewModel(IWalkNavService navService) : base(navService)
         {
+            locationService = DependencyService.Get<IWalkLocationService>();
+            if (locationService != null)
+            {
+                locationService.MyLocation += (object sender, IWalkLocationCoords e) =>
+                {
+                    Latitude = e.latitude;
+                    Longitude = e.longitude;
+                    locationService.GetMyLocation();
+                };
+            }
+
             Title = "Nowy szlak";
             Difficulty = "Niski";
             Distace = 1.0;
@@ -99,11 +115,12 @@ namespace TrackMyWalks.ViewModels
         {
             get
             {
-                return _saveCommand ?? (_saveCommand = new Command(ExecuteSaveCommand, ValidateFormDetails));
+                return _saveCommand ?? (_saveCommand =
+                    new Command(async () => await ExecuteSaveCommand(), ValidateFormDetails));
             }
         }
 
-        void ExecuteSaveCommand()
+        async Task ExecuteSaveCommand()
         {
             var newWalkItem = new WalkEntries
             {
@@ -116,11 +133,25 @@ namespace TrackMyWalks.ViewModels
                 Distance = this.Distace,
                 ImageUrl = this.ImageUrl
             };
+            locationService = null;
+            await NavService.PreviousPage();
         }
         bool ValidateFormDetails()
         {
             return !string.IsNullOrWhiteSpace(Title);
         }
+
+        public override async Task Init()
+        {
+            await Task.Factory.StartNew(() =>
+            {
+                Title = "Nowy szlak";
+                Difficulty = "Niski";
+                Distace = 1.0;
+            });
+        }
+
+
 
     }
 }

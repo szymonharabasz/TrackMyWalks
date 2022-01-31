@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using TrackMyWalks.Models;
 using TrackMyWalks.Services;
 using TrackMyWalks.ViewModels;
 using Xamarin.Forms;
@@ -52,10 +53,10 @@ namespace TrackMyWalks.Services
                 await navigation.PushAsync(view, true);
             }
 
-            if (navigation.NavigationStack.Last().BindingContext is WalkBaseViewModel<WalkParam>)
+            if (navigation.NavigationStack.Last().BindingContext is WalkBaseViewModel<WalkEntries>)
             {
-                await((WalkBaseViewModel<WalkParam>)(navigation.NavigationStack.Last().BindingContext))
-                    .Init(parameter);
+                await((WalkBaseViewModel<WalkEntries>)(navigation.NavigationStack.Last().BindingContext))
+                    .Init();
             }
         }
     }

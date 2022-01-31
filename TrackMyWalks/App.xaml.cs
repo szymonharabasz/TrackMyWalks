@@ -3,6 +3,8 @@ using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using Xamarin.Essentials;
 using TrackMyWalks.Pages;
+using TrackMyWalks.Services;
+using TrackMyWalks.ViewModels;
 
 namespace TrackMyWalks
 {
@@ -17,11 +19,19 @@ namespace TrackMyWalks
             }
             else
             {
-                var navPage = new NavigationPage(new TrackMyWalks.Pages.WalksPage())
+                var walksPage = new NavigationPage(new WalksPage())
                 {
-                    Title = "Track My Walks"
+                    Title = "Track My Walks - iOS"
                 };
-                MainPage = navPage;
+                walksPage.BarBackgroundColor = Color.FromHex("#440099");
+                walksPage.BarTextColor = Color.White;
+                var navService = DependencyService.Get<IWalkNavService>() as WalkNavService;
+                navService.navigation = walksPage.Navigation;
+                navService.RegisterViewMaping(typeof(WalksPageViewModel), typeof(WalksPage));
+                navService.RegisterViewMaping(typeof(WalksEntryViewModel), typeof(WalkEntryPage));
+                navService.RegisterViewMaping(typeof(WalksTrailViewModel), typeof(WalkTrailPage));
+                navService.RegisterViewMaping(typeof(DistanceTravelledViewModel), typeof(DistanceTravelledPage));
+                MainPage = walksPage;
 
             }
         }

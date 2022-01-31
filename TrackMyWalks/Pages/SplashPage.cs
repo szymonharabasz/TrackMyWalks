@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
-
+using TrackMyWalks.Services;
+using TrackMyWalks.ViewModels;
 using Xamarin.Forms;
 
 namespace TrackMyWalks.Pages
@@ -31,15 +32,24 @@ namespace TrackMyWalks.Pages
             };
         }
 
-        protected override async void OnAppearingAsync()
+        protected override async void OnAppearing()
         {
             base.OnAppearing();
             await Task.Delay(3000);
 
             var navPage = new NavigationPage(new WalksPage()
             {
-                Title = "Track My Walks"
+                Title = "Track My Walks - Android"
             });
+            navPage.BarBackgroundColor = Color.FromHex("#4C5678");
+            navPage.BarTextColor = Color.White;
+            var navService = DependencyService.Get<IWalkNavService>() as WalkNavService;
+            navService.navigation = navPage.Navigation;
+            navService.RegisterViewMaping(typeof(WalksPageViewModel), typeof(WalksPage));
+            navService.RegisterViewMaping(typeof(WalksEntryViewModel), typeof(WalkEntryPage));
+            navService.RegisterViewMaping(typeof(WalksTrailViewModel), typeof(WalkTrailPage));
+            navService.RegisterViewMaping(typeof(DistanceTravelledViewModel), typeof(DistanceTravelledPage));
+
             Application.Current.MainPage = navPage;
         }
     }

@@ -55,7 +55,8 @@ namespace TrackMyWalks.Pages
 
             Content = walksList;
         }
-        protected override async Task OnAppearingAsync()
+
+        protected override async void OnAppearing()
         {
             base.OnAppearing();
             if (_viewModel != null)

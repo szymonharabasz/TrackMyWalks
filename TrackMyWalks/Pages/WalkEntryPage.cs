@@ -3,16 +3,25 @@
 using Xamarin.Forms;
 using TrackMyWalks.Models;
 using TrackMyWalks.ViewModels;
+using TrackMyWalks.Services;
 
 namespace TrackMyWalks.Pages
 {
     public class WalkEntryPage : ContentPage
     {
+        WalksEntryViewModel _viewModwl
+        {
+            get
+            {
+                return BindingContext as WalksEntryViewModel;
+            }
+        }
+
         public WalkEntryPage()
         {
             Title = "Nowy wpis";
 
-            BindingContext = new WalksEntryViewModel();
+            BindingContext = new WalksEntryViewModel(DependencyService.Get<IWalkNavService>());
 
             var walkTitle = new EntryCell
             {
