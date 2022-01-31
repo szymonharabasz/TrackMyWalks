@@ -3,12 +3,22 @@
 using Xamarin.Forms;
 using TrackMyWalks.Models;
 using TrackMyWalks.ViewModels;
+using TrackMyWalks.Services;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace TrackMyWalks.Pages
 {
     public class WalksPage : ContentPage
     {
+        WalksPageViewModel _viewModel
+        {
+            get
+            {
+                return BindingContext as WalksPageViewModel;
+            }
+        }
+
         public WalksPage()
         {
 
@@ -16,14 +26,10 @@ namespace TrackMyWalks.Pages
             {
                 Text = "Dodaj szlak"
             };
-            newWalkItem.Clicked += (sender, e) =>
-            {
-                Navigation.PushAsync(new WalkEntryPage());
-            };
-
+            newWalkItem.SetBinding(ToolbarItem.CommandProperty, "CreatenewWalk");
             ToolbarItems.Add(newWalkItem);
 
-            BindingContext = new WalksPageViewModel();
+            BindingContext = new WalksPageViewModel(DependencyService.Get<IWalkNavService>());
 
 
 
@@ -43,11 +49,17 @@ namespace TrackMyWalks.Pages
             {
                 var item = (WalkEntries)e.Item;
                 if (item == null) return;
-                Navigation.PushAsync(new WalkTrailPage(item));
+                _viewModel.WalkTrailDetails.Execute(item);
                 item = null;
             };
 
             Content = walksList;
+        }
+        protected override async Task OnAppearingAsync()
+        {
+            base.OnAppearing();
+            if (_viewModel != null)
+                await _viewModel.Init();
         }
     }
 }

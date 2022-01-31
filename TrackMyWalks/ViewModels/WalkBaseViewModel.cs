@@ -1,12 +1,18 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TrackMyWalks.Services;
 
 namespace TrackMyWalks.ViewModels
 {
-    public class WalkBaseViewModel : INotifyPropertyChanged
+    public abstract class WalkBaseViewModel : INotifyPropertyChanged
     {
-        public WalkBaseViewModel()
+        protected IWalkNavService NavService { get; private set; }
+
+        protected WalkBaseViewModel(IWalkNavService navService)
         {
+            NavService = navService;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -19,5 +25,20 @@ namespace TrackMyWalks.ViewModels
                 handler(this, new PropertyChangedEventArgs(propertyName));
             }
         }
+
+        public abstract Task Init();
+    }
+
+    public abstract class WalkBaseViewModel<WalkParam> : WalkBaseViewModel
+    {
+        protected WalkBaseViewModel(IWalkNavService navService) : base(navService)
+        {
+        }
+
+        public override async Task Init()
+        {
+            await Init(default(WalkParam));
+        }
+        public abstract Task Init(WalkParam walkDetails);
     }
 }

@@ -31,7 +31,7 @@ namespace TrackMyWalks.Pages
             };
         }
 
-        protected override async void OnAppearing()
+        protected override async void OnAppearingAsync()
         {
             base.OnAppearing();
             await Task.Delay(3000);
